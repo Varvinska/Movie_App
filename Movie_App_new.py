@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[8]:
+# In[9]:
 
 
 import streamlit as st
@@ -17,20 +17,12 @@ warnings.filterwarnings('ignore')
 
 st.title("🎬 Movie Insight Dashboard")
 
-url = "https://raw.githubusercontent.com/CCT-Dublin/machine-learning-for-business-ca2-Varvinska/refs/heads/main/movie_dataset.csv?token=GHSAT0AAAAAADD7UTRJEOJDV3HUEFCSFM3S2BHIY2Q"
-
-@st.cache_data
 def load_data():
-    return pd.read_csv(url)
-
-df = load_data()
-
-
-if df is not None:
-    st.success("Dataset loaded successfully!")
-    st.write(df.head())
-else:
-    st.warning("Please upload the movie_dataset.csv file to continue.")
+    try:
+        return pd.read_csv("movie_dataset.csv")  # Local file
+    except FileNotFoundError:
+        url = "https://raw.githubusercontent.com/CCT-Dublin/machine-learning-for-business-ca2-Varvinska/main/movie_dataset.csv"
+        return pd.read_csv(url)
 
 
 # Preview
