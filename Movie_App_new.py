@@ -1,88 +1,106 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[13]:
 
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import plotly.express as px
+from wordcloud import WordCloud
 import seaborn as sns
 
-# Load data
-df = pd.read_csv("movie_dataset.csv")
+st.set_page_config(page_title="🎬 Movie Insight Dashboard", layout="wide")
+st.title("🎬 Movie Ratings Dashboard for Young Adults (18–35)")
 
-# Page config
-st.set_page_config(page_title="Movie Insights Dashboard", layout="wide")
+# Load dataset
+@st.cache_data
+def load_data():
+    df = pd.read_csv("C:/Users/Evelina/Documents/GitHub/machine-learning-for-business-ca2-Varvinska/movie_dataset.csv")
+    df['timestamp_x'] = pd.to_datetime(df['timestamp_x'], unit='s')
+    return df
 
-# Header
-st.title("Movie Dashboard for Young Adults (18–35)")
-st.markdown("Explore trends and data insights suitable for predictive modeling in online retail.")
+df = load_data()
 
-# Sidebar filters
-st.sidebar.header("Filter Options")
-genres = df['genres'].dropna().unique().tolist()
-selected_genres = st.sidebar.multiselect("Select Genre(s)", genres, default=genres)
-rating_range = st.sidebar.slider("Select Rating Range", float(df['rating'].min()), float(df['rating'].max()), (2.0, 5.0))
+# Preview
+if st.checkbox("Show raw data"):
+    st.dataframe(df.head(20))
 
-# Filtered Data
-filtered_df = df[
-    (df['genres'].isin(selected_genres)) &
-    (df['rating'] >= rating_range[0]) &
-    (df['rating'] <= rating_range[1])
-]
+# Genre Analysis
+st.subheader("🍿 Most Rated Genres")
 
-# Summary Metrics
-st.subheader("📊 Summary Statistics")
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("Average Rating", round(filtered_df["rating"].mean(), 2))
-with col2:
-    st.metric("Most Common Genre", filtered_df["genres"].mode()[0])
-with col3:
-    st.metric("Total Movies", len(filtered_df))
+genre_counts = df['genres'].str.split('|').explode().value_counts().reset_index()
+genre_counts.columns = ['Genre', 'Count']
 
-# Genre popularity
-st.subheader("Genre Popularity")
-genre_count = filtered_df['genres'].value_counts().head(10)
-fig1, ax1 = plt.subplots()
-sns.barplot(x=genre_count.values, y=genre_count.index, palette='cool', ax=ax1)
-ax1.set_xlabel("Number of Movies")
-st.pyplot(fig1)
+fig_genre = px.bar(genre_counts.head(10), x='Genre', y='Count', color='Genre', title="Top 10 Most Rated Genres")
+st.plotly_chart(fig_genre, use_container_width=True)
 
-# Rating distribution
-st.subheader("Ratings Distribution")
-fig2, ax2 = plt.subplots()
-sns.histplot(filtered_df['rating'], bins=20, kde=True, ax=ax2, color='coral')
-st.pyplot(fig2)
+# Average Rating per Genre
+st.subheader("⭐ Average Rating by Genre")
 
-# Ratings over time
-st.subheader("Rating Trends Over Time")
-fig3, ax3 = plt.subplots()
-sns.scatterplot(data=filtered_df, x='timestamp_x', y='rating', hue='genres', alpha=0.6, ax=ax3)
-st.pyplot(fig3)
+genre_ratings = df.copy()
+genre_ratings = genre_ratings.dropna(subset=['genres'])
+genre_ratings['genre'] = genre_ratings['genres'].str.split('|')
+genre_ratings = genre_ratings.explode('genre')
+avg_rating_by_genre = genre_ratings.groupby('genre')['rating'].mean().sort_values(ascending=False).reset_index()
 
-# ML Suitability section
-st.sidebar.markdown("ML Suitability Insights")
-st.sidebar.markdown("""
-- Multiple numerical & categorical features.
-- Predictable target variable (Rating, Success).
-- Useful for:
-  - Movie recommendation.
-  - Revenue prediction.
-  - Genre-based targeting.
-""")
+fig_avg = px.bar(avg_rating_by_genre, x='genre', y='rating', title="Average Rating per Genre", color='genre')
+st.plotly_chart(fig_avg, use_container_width=True)
 
-# Correlation matrix
-st.subheader("Feature Correlation Matrix")
-numeric_df = filtered_df.select_dtypes(include='number')
-if not numeric_df.empty:
-    fig4, ax4 = plt.subplots()
-    sns.heatmap(numeric_df.corr(), annot=True, cmap="coolwarm", ax=ax4)
-    st.pyplot(fig4)
+# Rating Distribution
+st.subheader("📊 Distribution of Ratings")
+
+fig_hist = px.histogram(df, x='rating', nbins=20, title='Ratings Histogram')
+st.plotly_chart(fig_hist, use_container_width=True)
+
+# Word Cloud of Tags
+st.subheader("🏷️ Word Cloud from Tags")
+
+if df['tag'].notna().sum() > 0:
+    text = ' '.join(df['tag'].dropna().astype(str))
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    fig_wc, ax_wc = plt.subplots(figsize=(12, 6))
+    ax_wc.imshow(wordcloud, interpolation='bilinear')
+    ax_wc.axis('off')
+    st.pyplot(fig_wc)
 else:
-    st.info("Not enough numeric data for correlation matrix.")
+    st.warning("No tag data available to generate word cloud.")
+
+# Correlation Matrix
+st.subheader("🔍 Correlation Between Numeric Features")
+
+numeric_df = df[['userId', 'movieId', 'rating']]
+corr = numeric_df.corr()
+fig_corr, ax_corr = plt.subplots()
+sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax_corr)
+st.pyplot(fig_corr)
+
+# Interactive: Top Movies
+st.subheader("🏆 Top Rated Movies")
+
+min_votes = st.slider("Minimum number of ratings:", 10, 100, 50)
+
+top_movies = (
+    df.groupby('title')
+    .agg(avg_rating=('rating', 'mean'), num_ratings=('rating', 'count'))
+    .query("num_ratings >= @min_votes")
+    .sort_values(by='avg_rating', ascending=False)
+    .head(10)
+    .reset_index()
+)
+
+st.dataframe(top_movies)
+
+# Footer
+st.markdown("""
+---
+✅ This dashboard provides a clear summary of movie rating behavior.
+🧠 This dataset is ideal for **recommendation systems** in online retail, as it contains:
+- User-item interaction (`userId`, `movieId`, `rating`)
+- Categorical info for content-based filtering (`genres`, `tags`)
+- Time-based behavior (`timestamp_x`)
+""")
 
 
 # In[ ]:
