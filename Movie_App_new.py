@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[10]:
+# In[12]:
 
 
 #!/usr/bin/env python
@@ -28,16 +28,15 @@ def load_data():
 df = load_data()
 
 
-# --- Sidebar Filters ---
-st.sidebar.header("🎛️ Filter Options")
+# Define genres list
+all_genres = sorted(set(g for sublist in df['genres'].dropna().str.split('|') for g in sublist))
 
-# Parse genres from pipe-separated values
+# Sidebar filters
+selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, default=all_genres[:3])
+rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), 0.5)
+available_tags = sorted(df['tag'].dropna().unique())
+selected_tags = st.sidebar.multiselect("Select Tag(s)", options=available_tags)
 
-genres = st.sidebar.multiselect("Select Genre(s)", options=sorted(df["genres"].dropna().unique()))
-
-selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, default=["Action", "Comedy", "Drama"])
-
-rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), step=0.5)
 
 # Get all unique non-null tags
 all_tags = sorted(df["tag"].dropna().unique())
