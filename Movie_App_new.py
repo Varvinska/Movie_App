@@ -1,27 +1,37 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[13]:
+# In[7]:
 
 
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import plotly.express as px
+import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import seaborn as sns
 
-st.set_page_config(page_title="🎬 Movie Insight Dashboard", layout="wide")
-st.title("🎬 Movie Ratings Dashboard for Young Adults (18–35)")
+import warnings
+warnings.filterwarnings('ignore')
 
-# Load dataset
+
+st.title("🎬 Movie Insight Dashboard")
+
+url = "https://raw.githubusercontent.com/Varvinska/Movie_App/main/movie_dataset.csv"
+
 @st.cache_data
 def load_data():
-    df = pd.read_csv("C:/Users/Evelina/Documents/GitHub/machine-learning-for-business-ca2-Varvinska/movie_dataset.csv")
-    df['timestamp_x'] = pd.to_datetime(df['timestamp_x'], unit='s')
-    return df
+    return pd.read_csv(url)
 
 df = load_data()
+
+
+if df is not None:
+    st.success("Dataset loaded successfully!")
+    st.write(df.head())
+else:
+    st.warning("Please upload the movie_dataset.csv file to continue.")
+
 
 # Preview
 if st.checkbox("Show raw data"):
