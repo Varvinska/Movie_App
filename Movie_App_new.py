@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[4]:
 
 
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Load data
 df = pd.read_csv("movie_dataset.csv")
@@ -22,7 +24,7 @@ st.markdown("Explore trends and data insights suitable for predictive modeling i
 st.sidebar.header("Filter Options")
 genres = df['genres'].dropna().unique().tolist()
 selected_genres = st.sidebar.multiselect("Select Genre(s)", genres, default=genres)
-rating_range = st.sidebar.slider("Select Rating Range", float(df['rating'].min()), float(df['rating'].max()), (2.0, 10.0))
+rating_range = st.sidebar.slider("Select Rating Range", float(df['rating'].min()), float(df['rating'].max()), (2.0, 5.0))
 
 # Filtered Data
 filtered_df = df[
@@ -32,14 +34,14 @@ filtered_df = df[
 ]
 
 # Summary Metrics
-st.subheader("Summary Statistics")
+st.subheader("📊 Summary Statistics")
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Average Rating", round(filtered_df["rating"].mean(), 2))
 with col2:
     st.metric("Most Common Genre", filtered_df["genres"].mode()[0])
 with col3:
-    st.metric("Top Release Year", int(filtered_df["timestamp_x"].mode()[0]))
+    st.metric("Total Movies", len(filtered_df))
 
 # Genre popularity
 st.subheader("Genre Popularity")
