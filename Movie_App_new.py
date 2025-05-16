@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[5]:
+# In[10]:
 
 
 #!/usr/bin/env python
@@ -27,11 +27,14 @@ def load_data():
 
 df = load_data()
 
+
 # --- Sidebar Filters ---
 st.sidebar.header("🎛️ Filter Options")
 
 # Parse genres from pipe-separated values
-all_genres = sorted(set(genre for genres in df['genres'].dropna() for genre in genres.split('|')))
+
+genres = st.sidebar.multiselect("Select Genre(s)", options=sorted(df["genres"].dropna().unique()))
+
 selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, default=["Action", "Comedy", "Drama"])
 
 rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), step=0.5)
@@ -45,8 +48,8 @@ filtered_df = df.copy()
 
 # Filter by selected genres
 if selected_genres:
-    filtered_df = filtered_df[filtered_df['genres'].apply(lambda x: any(g in x.split('|') for g in selected_genres) if pd.notna(x) else False)]
-
+    df = df[df["genres"].isin(genres)]
+    
 # Filter by rating
 filtered_df = filtered_df[(filtered_df['rating'] >= rating_range[0]) & (filtered_df['rating'] <= rating_range[1])]
 
