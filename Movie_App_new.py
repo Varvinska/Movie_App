@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[8]:
 
 
 import streamlit as st
@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 
 st.title("🎬 Movie Insight Dashboard")
 
-url = "https://raw.githubusercontent.com/Varvinska/Movie_App/main/movie_dataset.csv"
+url = "https://raw.githubusercontent.com/CCT-Dublin/machine-learning-for-business-ca2-Varvinska/refs/heads/main/movie_dataset.csv?token=GHSAT0AAAAAADD7UTRJEOJDV3HUEFCSFM3S2BHIY2Q"
 
 @st.cache_data
 def load_data():
