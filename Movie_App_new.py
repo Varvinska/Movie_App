@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[5]:
 
 
 #!/usr/bin/env python
@@ -30,25 +30,27 @@ df = load_data()
 # --- Sidebar Filters ---
 st.sidebar.header("🎛️ Filter Options")
 
-all_genres = sorted(set(g for sublist in df['genres'].dropna().str.split('|') for g in sublist))
+# Parse genres from pipe-separated values
+all_genres = sorted(set(genre for genres in df['genres'].dropna() for genre in genres.split('|')))
 selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, default=["Action", "Comedy", "Drama"])
 
-rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), 0.5)
+rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), step=0.5)
 
+# Get all unique non-null tags
 all_tags = sorted(df["tag"].dropna().unique())
 selected_tags = st.sidebar.multiselect("Select Tag(s)", options=all_tags)
 
 # --- Data Filtering ---
 filtered_df = df.copy()
 
-# Filter by genre (at least one match)
+# Filter by selected genres
 if selected_genres:
     filtered_df = filtered_df[filtered_df['genres'].apply(lambda x: any(g in x.split('|') for g in selected_genres) if pd.notna(x) else False)]
 
 # Filter by rating
 filtered_df = filtered_df[(filtered_df['rating'] >= rating_range[0]) & (filtered_df['rating'] <= rating_range[1])]
 
-# Filter by tags
+# Filter by selected tags
 if selected_tags:
     filtered_df = filtered_df[filtered_df['tag'].isin(selected_tags)]
 
