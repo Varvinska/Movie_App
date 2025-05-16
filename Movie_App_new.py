@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
 import streamlit as st
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
 
 # Load data
 df = pd.read_csv("movie_dataset.csv")
