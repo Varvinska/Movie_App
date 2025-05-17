@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[3]:
 
 
 #!/usr/bin/env python
@@ -33,14 +33,12 @@ all_genres = sorted(df['genres'].dropna().unique())
 
 
 # Sidebar filters
-selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, default=all_genres[:3])
-rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), 0.5)
 available_tags = sorted(df['tag'].dropna().unique())
-selected_tags = st.sidebar.multiselect("Select Tag(s)", options=available_tags)
-
-# Get all unique non-null tags
 all_tags = sorted(df["tag"].dropna().unique())
-selected_tags = st.sidebar.multiselect("Select Tag(s)", options=all_tags)
+selected_genres = st.sidebar.multiselect("Select Genre(s)", options=all_genres, key="genre_multiselect", default=all_genres[:3])
+rating_range = st.sidebar.slider("Select Rating Range", 0.0, 5.0, (3.0, 5.0), 0.5)
+selected_tags = st.sidebar.multiselect("Select Tag(s)", options=all_tags, key="tag_multiselect")
+
 
 # Data Filtering
 filtered_df = df.copy()
