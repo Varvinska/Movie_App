@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[4]:
 
 
 #!/usr/bin/env python
@@ -88,7 +88,7 @@ st.subheader("🏷️ Word Cloud from Tags")
 if filtered_df['tag'].notna().sum() > 0:
     text = ' '.join(filtered_df['tag'].dropna().astype(str))
     wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-    fig_wc, ax_wc = plt.subplots(figsize=(12, 6))
+    fig_wc, ax_wc = plt.subplots(figsize=(10, 5))
     ax_wc.imshow(wordcloud, interpolation='bilinear')
     ax_wc.axis('off')
     st.pyplot(fig_wc)
@@ -100,7 +100,7 @@ st.subheader("🔍 Correlation Between Numeric Features")
 numeric_df = filtered_df[['userId', 'movieId', 'rating']]
 if not numeric_df.empty:
     corr = numeric_df.corr()
-    fig_corr, ax_corr = plt.subplots()
+    fig_corr, ax_corr = plt.subplots(figsize=(5, 3))
     sns.heatmap(corr, annot=True, cmap='coolwarm', ax=ax_corr)
     st.pyplot(fig_corr)
 else:
