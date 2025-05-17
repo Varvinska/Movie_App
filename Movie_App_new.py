@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[5]:
 
 
 #!/usr/bin/env python
@@ -66,7 +66,7 @@ if st.checkbox("Show raw data"):
 st.subheader("🍿 Most Rated Genres")
 genre_counts = filtered_df['genres'].str.split('|').explode().value_counts().reset_index()
 genre_counts.columns = ['Genre', 'Count']
-fig_genre = px.bar(genre_counts.head(10), x='Genre', y='Count', color='Genre', title="Top 10 Most Rated Genres")
+fig_genre = px.bar(genre_counts.head(10), x='Genre', y='Count', color='Genre', title="Most Rated Genres (selected)")
 st.plotly_chart(fig_genre, use_container_width=True)
 
 # Average Rating by Genre
