@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[14]:
+# In[2]:
 
 
 #!/usr/bin/env python
@@ -42,32 +42,36 @@ selected_tags = st.sidebar.multiselect("Select Tag(s)", options=available_tags)
 all_tags = sorted(df["tag"].dropna().unique())
 selected_tags = st.sidebar.multiselect("Select Tag(s)", options=all_tags)
 
-# --- Data Filtering ---
+# Data Filtering
 filtered_df = df.copy()
 
 # Filter by selected genres
 if selected_genres:
-    df = df[df["genres"].isin(genres)]
-    
+    filtered_df = filtered_df[
+        filtered_df["genres"].dropna().str.split('|').apply(lambda genre_list: any(g in genre_list for g in selected_genres))
+    ]
+
 # Filter by rating
-filtered_df = filtered_df[(filtered_df['rating'] >= rating_range[0]) & (filtered_df['rating'] <= rating_range[1])]
+filtered_df = filtered_df[
+    (filtered_df['rating'] >= rating_range[0]) & (filtered_df['rating'] <= rating_range[1])
+]
 
 # Filter by selected tags
 if selected_tags:
-    filtered_df = filtered_df[filtered_df['tag'].isin(selected_tags)]
+    filtered_df = filtered_df[filtered_df["tag"].isin(selected_tags)]
 
-# --- Show Raw Data ---
+# Show Raw Data
 if st.checkbox("Show raw data"):
     st.dataframe(filtered_df.head(20))
 
-# --- Genre Analysis ---
+# Genre Analysis
 st.subheader("🍿 Most Rated Genres")
 genre_counts = filtered_df['genres'].str.split('|').explode().value_counts().reset_index()
 genre_counts.columns = ['Genre', 'Count']
 fig_genre = px.bar(genre_counts.head(10), x='Genre', y='Count', color='Genre', title="Top 10 Most Rated Genres")
 st.plotly_chart(fig_genre, use_container_width=True)
 
-# --- Average Rating by Genre ---
+# Average Rating by Genre
 st.subheader("⭐ Average Rating by Genre")
 genre_ratings = filtered_df.dropna(subset=['genres']).copy()
 genre_ratings['genre'] = genre_ratings['genres'].str.split('|')
@@ -76,12 +80,12 @@ avg_rating_by_genre = genre_ratings.groupby('genre')['rating'].mean().sort_value
 fig_avg = px.bar(avg_rating_by_genre, x='genre', y='rating', title="Average Rating per Genre", color='genre')
 st.plotly_chart(fig_avg, use_container_width=True)
 
-# --- Rating Distribution ---
+# Rating Distribution
 st.subheader("📊 Distribution of Ratings")
 fig_hist = px.histogram(filtered_df, x='rating', nbins=20, title='Ratings Histogram')
 st.plotly_chart(fig_hist, use_container_width=True)
 
-# --- Word Cloud ---
+# Word Cloud
 st.subheader("🏷️ Word Cloud from Tags")
 if filtered_df['tag'].notna().sum() > 0:
     text = ' '.join(filtered_df['tag'].dropna().astype(str))
@@ -93,7 +97,7 @@ if filtered_df['tag'].notna().sum() > 0:
 else:
     st.warning("No tag data available to generate word cloud.")
 
-# --- Correlation Matrix ---
+# Correlation Matrix
 st.subheader("🔍 Correlation Between Numeric Features")
 numeric_df = filtered_df[['userId', 'movieId', 'rating']]
 if not numeric_df.empty:
@@ -104,7 +108,7 @@ if not numeric_df.empty:
 else:
     st.info("Not enough numeric data after filtering.")
 
-# --- Top Movies ---
+# Top Movies
 st.subheader("🏆 Top Rated Movies")
 min_votes = st.slider("Minimum number of ratings:", 10, 100, 50)
 top_movies = (
@@ -118,7 +122,7 @@ top_movies = (
 
 st.dataframe(top_movies)
 
-# --- Footer ---
+# Footer
 st.markdown("""
 ---
 ✅ This dashboard provides a clear summary of movie rating behavior.
